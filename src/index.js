@@ -131,7 +131,7 @@ function construct_jam_container(id){
     var jam_name = document.createElement("div");
     jam_name.setAttribute("class", "JamName");
     jam_name.setAttribute("id", `JamName${id}`);
-    // jam_name.innerHTML = name;
+    // jam_name.textContent = name;
     jam_top.appendChild(jam_name);
 
     var jam_participants = document.createElement("section");
@@ -172,7 +172,7 @@ function construct_jam_container(id){
 function modify_jam(id, field, value) {
     try{
         if (field == "JamName" || field == "TrackTitle" ||  field == "TrackArtist")
-            document.getElementById(`${field}${id}`).innerHTML = value;
+            document.getElementById(`${field}${id}`).textContent = value;
         else if (field == "AlbumImage")
             document.getElementById(`AlbumImage${id}`).src = value;
     }catch(error){
@@ -185,10 +185,10 @@ function makeEditable(id) {
     // Create an input element
     const inputElement = document.createElement('input');
     inputElement.type = 'text';
-    inputElement.value = element.innerHTML;
+    inputElement.value = element.textContent;
     const computedStyle = window.getComputedStyle(element);
     // Replace the div content with the input element
-    element.innerHTML = '';
+    element.textContent = '';
     // Set the input element style
     inputElement.style.width = 'auto';
     inputElement.style.border = 'none';
@@ -206,7 +206,7 @@ function makeEditable(id) {
 
     // Handle Enter key press to save changes
     inputElement.addEventListener('blur', () => {
-        // element.innerHTML = inputElement.value
+        // element.textContent = inputElement.value
         const reference = ref(db, 'jams/' + id)
         update(reference, {
             jam_name: inputElement.value.substring(0, 15),
