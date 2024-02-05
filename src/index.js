@@ -85,7 +85,6 @@ async function onPageLoad() {
     });
     const queryString = window.location.search;
     // If we logged in
-    console.log("asd")
     if (queryString.length > 0) {
         const urlParams = new URLSearchParams(queryString);
         const code = urlParams.get('code');
@@ -95,20 +94,14 @@ async function onPageLoad() {
             localStorage.setItem('access_token', data.access_token);
             localStorage.setItem('refresh_token', data.refresh_token);
             localStorage.setItem('firebase_token', data.firebase_token);
-            // Sign in to firebase
-            const auth = getAuth();
-            await signInWithCustomToken(auth, data.firebase_token)
-              .then((userCredential) => {
-                console.log(userCredential.user)
-              })
-
             handle_log_in()
         } catch (error) {
             console.error(error);
             alert(error.message);
         }
         window.history.pushState("", "", redirect_uri);
-    } 
+    }
+    // If we refresh the page when we logged in
     else {
         if (localStorage.getItem("access_token")) {
             const auth = getAuth();
@@ -116,7 +109,10 @@ async function onPageLoad() {
                 .then((userCredential) => {
                 console.log(userCredential.user)
                 })
-            handle_log_in()
+            document.getElementById("Login_Button").style.display = 'none';
+            document.getElementById("Profile_Photo").style.display = 'block';
+            document.getElementById("Profile_Photo").src = localStorage.getItem("profile_picture");
+            setInterval(GetSpotify, 250);
         } else {
             document.getElementById("Profile_Photo").style.display = 'none';
             document.getElementById("Login_Button").style.display = 'block';
@@ -271,6 +267,12 @@ async function change_music(music_url){
 }
 
 async function handle_log_in() {
+    // Sign in to firebase
+    const auth = getAuth();
+    await signInWithCustomToken(auth, localStorage.getItem('firebase_token'))
+        .then((userCredential) => {
+        console.log(userCredential.user)
+        })
     document.getElementById("Login_Button").style.display = 'none';
     document.getElementById("Profile_Photo").style.display = 'block';
     const profile_info = await fetchWebApi('v1/me', 'GET');
