@@ -92,7 +92,7 @@ async function onPageLoad() {
             const response = await fetch('https://us-central1-fyspotify-f83f1.cloudfunctions.net/getToken?code=' + code);
             const data = await response.json();
             localStorage.setItem('access_token', data.access_token);
-            // localStorage.setItem('refresh_token', data.refresh_token);
+            localStorage.setItem('refresh_token', data.refresh_token);
             localStorage.setItem('firebase_token', data.firebase_token);
             handle_log_in()
         } catch (error) {
@@ -389,7 +389,7 @@ function logout() {
     // Clear the authorization data from local storage
     localStorage.removeItem("access_token");
     localStorage.removeItem("firebase_token");
-    // localStorage.removeItem("refresh_token");
+    localStorage.removeItem("refresh_token");
     location.reload()
 }
 

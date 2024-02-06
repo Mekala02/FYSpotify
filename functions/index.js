@@ -38,7 +38,6 @@ exports.getToken = functions.https.onRequest(async (req, res) => {
     Also, set up environment variables for your Firebase Function using firebase
     functions:config:set spotify.client_id="YOUR_CLIENT_ID"
     spotify.client_secret="YOUR_CLIENT_SECRET"
-    spotify.redirect_uri="YOUR_REDIRECT_URI".
     */
     cors(req, res, async () => {
         try {
@@ -60,29 +59,9 @@ exports.getToken = functions.https.onRequest(async (req, res) => {
             });
 
             const data = await response.json();
-
             const { access_token, refresh_token } = data;
-            const spotifyResponse = await fetch('https://api.spotify.com/v1/me', {
-                headers: {
-                Authorization: `Bearer ${access_token}`
-                }
-            });
-            const profile_info = await spotifyResponse.json();
-            const id = profile_info.id;
-            const profile_picture = profile_info.images
-            const firebase_token = await admin.auth().createCustomToken(id);
-            
-            const reference = admin.database().ref('users/' + id)
-            reference.set({
-                email: profile_info.email,
-                username: profile_info.display_name,
-                profile_picture: profile_picture,
-                access_token: access_token,
-                refresh_token: refresh_token,
-                firebase_token: firebase_token
-            })
-
-            res.json({ access_token, firebase_token });
+            const firebase_token = await handle_new_spotify_token(access_token, refresh_token);
+            res.json({ access_token, refresh_token, firebase_token });
 
         } catch (error) {
             console.error('Error:', error);
@@ -90,3 +69,26 @@ exports.getToken = functions.https.onRequest(async (req, res) => {
         }
     });
 });
+
+async function handle_new_spotify_token(access_token, refresh_token){
+    const spotifyResponse = await fetch('https://api.spotify.com/v1/me', {
+        headers: {
+        Authorization: `Bearer ${access_token}`
+        }
+    });
+    const profile_info = await spotifyResponse.json();
+    const id = profile_info.id;
+    const profile_picture = profile_info.images
+    const firebase_token = await admin.auth().createCustomToken(id);
+    
+    const reference = admin.database().ref('users/' + id)
+    reference.set({
+        email: profile_info.email,
+        username: profile_info.display_name,
+        profile_picture: profile_picture,
+        access_token: access_token,
+        refresh_token: refresh_token,
+        firebase_token: firebase_token
+    })
+    return firebase_token
+}
