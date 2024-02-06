@@ -388,6 +388,7 @@ function request_authorization() {
 function logout() {
     // Clear the authorization data from local storage
     localStorage.removeItem("access_token");
+    localStorage.removeItem("firebase_token");
     // localStorage.removeItem("refresh_token");
     location.reload()
 }
