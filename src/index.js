@@ -92,7 +92,7 @@ async function onPageLoad() {
             const response = await fetch('https://us-central1-fyspotify-f83f1.cloudfunctions.net/getToken?code=' + code);
             const data = await response.json();
             localStorage.setItem('access_token', data.access_token);
-            localStorage.setItem('refresh_token', data.refresh_token);
+            // localStorage.setItem('refresh_token', data.refresh_token);
             localStorage.setItem('firebase_token', data.firebase_token);
             handle_log_in()
         } catch (error) {
@@ -275,6 +275,7 @@ async function handle_log_in() {
         })
     document.getElementById("Login_Button").style.display = 'none';
     document.getElementById("Profile_Photo").style.display = 'block';
+
     const profile_info = await fetchWebApi('v1/me', 'GET');
     const profile_picture = profile_info.images[0]
     console.log(profile_info);
@@ -286,15 +287,6 @@ async function handle_log_in() {
     else
         localStorage.setItem("profile_picture", "images/default_pp.png");
     document.getElementById("Profile_Photo").src = localStorage.getItem("profile_picture");
-    // Writes the user to the database
-    const reference = ref(db, 'users/' + profile_info.id)
-    set(reference, {
-        email: profile_info.email,
-        username: profile_info.display_name,
-        picture_url: localStorage.getItem("profile_picture"),
-        access_token: localStorage.getItem("access_token"),
-        refresh_token: localStorage.getItem("refresh_token")
-    })
     setInterval(GetSpotify, 250);
 }
 
@@ -369,19 +361,19 @@ async function fetchWebApi(endpoint, method, body) {
     return jsonData;
 }
 
-async function refresh_access_token() {
-    const refresh_token = localStorage.getItem("refresh_token");
-    const body = new URLSearchParams();
-    body.append('grant_type', 'refresh_token');
-    body.append('refresh_token', refresh_token);
-    body.append('client_id', spotify_client_id);
+// async function refresh_access_token() {
+//     const refresh_token = localStorage.getItem("refresh_token");
+//     const body = new URLSearchParams();
+//     body.append('grant_type', 'refresh_token');
+//     body.append('refresh_token', refresh_token);
+//     body.append('client_id', spotify_client_id);
 
-    try {
-        await callAuthorizationApi(body.toString());
-    } catch (error) {
-        console.error(error);
-    }
-}
+//     try {
+//         await callAuthorizationApi(body.toString());
+//     } catch (error) {
+//         console.error(error);
+//     }
+// }
 
 function request_authorization() {
     const url = new URL("https://accounts.spotify.com/authorize");
@@ -396,7 +388,7 @@ function request_authorization() {
 function logout() {
     // Clear the authorization data from local storage
     localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
+    // localStorage.removeItem("refresh_token");
     location.reload()
 }
 

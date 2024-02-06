@@ -68,14 +68,26 @@ exports.getToken = functions.https.onRequest(async (req, res) => {
                 Authorization: `Bearer ${access_token}`
                 }
             });
-            const spotifyUserProfile = await spotifyResponse.json();
-            const id = spotifyUserProfile.id;
+            const profile_info = await spotifyResponse.json();
+            const id = profile_info.id;
+            const profile_picture = profile_info.images[0]
             const firebase_token = await admin.auth().createCustomToken(id);
-            res.json({ access_token, refresh_token, firebase_token });
+            
+            const reference = admin.database().ref('users/' + id)
+            reference.set({
+                email: profile_info.email,
+                username: profile_info.display_name,
+                profile_picture: profile_picture,
+                access_token: access_token,
+                refresh_token: refresh_token,
+                firebase_token: firebase_token
+            })
+
+            res.json({ access_token, firebase_token });
 
         } catch (error) {
-        console.error('Error:', error);
-        res.status(500).send('Internal Server Error');
+            console.error('Error:', error);
+            res.status(500).send('Internal Server Error');
         }
     });
 });
