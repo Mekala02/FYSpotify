@@ -73,9 +73,9 @@ exports.getToken = functions.https.onRequest(async (req, res) => {
             const firebase_token = await admin.auth().createCustomToken(id);
             res.json({ access_token, refresh_token, firebase_token });
 
-            } catch (error) {
-            console.error('Error:', error);
-            res.status(500).send('Internal Server Error');
-            }
+        } catch (error) {
+        console.error('Error:', error);
+        res.status(500).send('Internal Server Error');
+        }
     });
 });
