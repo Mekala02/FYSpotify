@@ -6,7 +6,7 @@ module.exports  = {
     mode: "production", // Change mode to production
     entry: "./src/index.js",
     output: {
-      path: path.resolve(__dirname, "production"),
+      path: path.resolve(__dirname, "docs"),
       filename: "[name].[contenthash].js", // Include contenthash in filename
       clean: true,
     },
