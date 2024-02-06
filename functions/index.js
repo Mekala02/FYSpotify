@@ -45,8 +45,7 @@ exports.getToken = functions.https.onRequest(async (req, res) => {
             const code = req.query.code;
             const clientId = functions.config().spotify.client_id;
             const clientSecret = functions.config().spotify.client_secret;
-            const redirectURI = functions.config().spotify.redirect_uri;
-
+            const redirectURI = req.headers.origin
             const response = await fetch('https://accounts.spotify.com/api/token', {
                 method: 'POST',
                 headers: {
@@ -70,7 +69,7 @@ exports.getToken = functions.https.onRequest(async (req, res) => {
             });
             const profile_info = await spotifyResponse.json();
             const id = profile_info.id;
-            const profile_picture = profile_info.images[0]
+            const profile_picture = profile_info.images
             const firebase_token = await admin.auth().createCustomToken(id);
             
             const reference = admin.database().ref('users/' + id)

@@ -5,7 +5,7 @@ import "./main.sass";
 import "./images/default_pp.png";
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const redirect_uri = "http://127.0.0.1:5500/";
+const redirect_uri = "http://127.0.0.1:5500";
 const firebaseConfig = {
     apiKey: "AIzaSyBBuPBTFnu_oeeba5vJ60fmp1hxNuexckY",
     authDomain: "fyspotify-f83f1.firebaseapp.com",
