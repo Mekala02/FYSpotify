@@ -70,6 +70,42 @@ exports.getToken = functions.https.onRequest(async (req, res) => {
     });
 });
 
+exports.refreshToken = functions.https.onRequest(async (req, res) => {
+    /*
+    Make sure to deploy the Firebase Function using firebase deploy --only functions after adding the code.
+    Also, set up environment variables for your Firebase Function using firebase
+    functions:config:set spotify.client_id="YOUR_CLIENT_ID"
+    spotify.client_secret="YOUR_CLIENT_SECRET"
+    */
+    cors(req, res, async () => {
+        try {
+            const current_refresh_token = req.query.refresh_token;
+            const clientId = functions.config().spotify.client_id;
+            const clientSecret = functions.config().spotify.client_secret;
+
+            const response = await fetch('https://accounts.spotify.com/api/token', {
+                method: 'POST',
+                headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization': `Basic ${Buffer.from(clientId + ':' + clientSecret).toString('base64')}`,
+                },
+                body: new URLSearchParams({
+                'grant_type': 'refresh_token',
+                'refresh_token': current_refresh_token,
+                }),
+            });
+
+            const data = await response.json();
+            const { access_token } = data;
+            const firebase_token = await handle_new_spotify_token(access_token, current_refresh_token);
+            res.json({ access_token, current_refresh_token, firebase_token });
+        } catch (error) {
+            console.error('Error:', error);
+            res.status(500).send('Internal Server Error');
+        }
+    });
+});
+
 async function handle_new_spotify_token(access_token, refresh_token){
     const spotifyResponse = await fetch('https://api.spotify.com/v1/me', {
         headers: {

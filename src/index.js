@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getDatabase, onValue, ref, set, update, remove, onDisconnect} from "firebase/database"
+import { getDatabase, ref, onValue, set, update, remove, onDisconnect} from "firebase/database"
 import { getAuth, signInWithCustomToken } from "firebase/auth";
 import "./main.sass";
 import "./images/default_pp.png";
@@ -94,6 +94,8 @@ async function onPageLoad() {
             localStorage.setItem('access_token', data.access_token);
             localStorage.setItem('refresh_token', data.refresh_token);
             localStorage.setItem('firebase_token', data.firebase_token);
+            localStorage.setItem('token_timestamp', Date.now());
+            setInterval(check_token_time, 60 * 1000);
             handle_log_in()
         } catch (error) {
             console.error(error);
@@ -113,9 +115,35 @@ async function onPageLoad() {
             document.getElementById("Profile_Photo").style.display = 'block';
             document.getElementById("Profile_Photo").src = localStorage.getItem("profile_picture");
             setInterval(GetSpotify, 250);
+            setInterval(check_token_time, 60 * 1000);
         } else {
             document.getElementById("Profile_Photo").style.display = 'none';
             document.getElementById("Login_Button").style.display = 'block';
+        }
+    }
+}
+
+async function check_token_time(){
+    const last_token_timestamp = localStorage.getItem('token_timestamp');
+    const current_time = Date.now()
+    const diff = current_time-last_token_timestamp
+    // If refresh token is expired
+    if (diff > 3600 * 1000){
+        logout()
+    }
+    // If 50 mins pased since we get acces token refresh the token
+    else if (diff > 3000 * 1000){
+        try {
+            const response = await fetch('https://us-central1-fyspotify-f83f1.cloudfunctions.net/refreshToken?refresh_token=' + localStorage.getItem('refresh_token'));
+            const data = await response.json();
+            console.log(data)
+            localStorage.setItem('access_token', data.access_token);
+            localStorage.setItem('refresh_token', data.refresh_token);
+            localStorage.setItem('firebase_token', data.firebase_token);
+            localStorage.setItem('token_timestamp', Date.now());
+        } catch (error) {
+            console.error(error);
+            logout()
         }
     }
 }
@@ -336,7 +364,7 @@ async function GetSpotify() {
         }
     } catch (error) {
         if (error.message === "Fetch error: 401 - Unauthorized") {
-            refresh_access_token();
+            logout();
         } else {
             console.error(error);
         }
@@ -361,20 +389,6 @@ async function fetchWebApi(endpoint, method, body) {
     return jsonData;
 }
 
-// async function refresh_access_token() {
-//     const refresh_token = localStorage.getItem("refresh_token");
-//     const body = new URLSearchParams();
-//     body.append('grant_type', 'refresh_token');
-//     body.append('refresh_token', refresh_token);
-//     body.append('client_id', spotify_client_id);
-
-//     try {
-//         await callAuthorizationApi(body.toString());
-//     } catch (error) {
-//         console.error(error);
-//     }
-// }
-
 function request_authorization() {
     const url = new URL("https://accounts.spotify.com/authorize");
     url.searchParams.append('client_id', spotify_client_id);
@@ -390,6 +404,7 @@ function logout() {
     localStorage.removeItem("access_token");
     localStorage.removeItem("firebase_token");
     localStorage.removeItem("refresh_token");
+    localStorage.removeItem("token_timestamp");
     location.reload()
 }
 
