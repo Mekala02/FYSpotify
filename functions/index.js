@@ -32,7 +32,7 @@ exports.trackUserCount = functions.database.ref('/jams/{jamId}/participants/{usr
     }
   });
 
-  exports.getToken = functions.https.onRequest(async (req, res) => {
+exports.getToken = functions.https.onRequest(async (req, res) => {
     /*
     Make sure to deploy the Firebase Function using firebase deploy --only functions after adding the code.
     Also, set up environment variables for your Firebase Function using firebase
@@ -42,40 +42,40 @@ exports.trackUserCount = functions.database.ref('/jams/{jamId}/participants/{usr
     */
     cors(req, res, async () => {
         try {
-        const code = req.query.code;
-        const clientId = functions.config().spotify.client_id;
-        const clientSecret = functions.config().spotify.client_secret;
-        const redirectURI = functions.config().spotify.redirect_uri;
+            const code = req.query.code;
+            const clientId = functions.config().spotify.client_id;
+            const clientSecret = functions.config().spotify.client_secret;
+            const redirectURI = functions.config().spotify.redirect_uri;
 
-        const response = await fetch('https://accounts.spotify.com/api/token', {
-            method: 'POST',
-            headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Authorization': `Basic ${Buffer.from(clientId + ':' + clientSecret).toString('base64')}`,
-            },
-            body: new URLSearchParams({
-            'grant_type': 'authorization_code',
-            'code': code,
-            'redirect_uri': redirectURI,
-            }),
-        });
+            const response = await fetch('https://accounts.spotify.com/api/token', {
+                method: 'POST',
+                headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization': `Basic ${Buffer.from(clientId + ':' + clientSecret).toString('base64')}`,
+                },
+                body: new URLSearchParams({
+                'grant_type': 'authorization_code',
+                'code': code,
+                'redirect_uri': redirectURI,
+                }),
+            });
 
-        const data = await response.json();
+            const data = await response.json();
 
-        const { access_token, refresh_token } = data;
-        const spotifyResponse = await fetch('https://api.spotify.com/v1/me', {
-          headers: {
-            Authorization: `Bearer ${access_token}`
-          }
-        });
-        const spotifyUserProfile = await spotifyResponse.json();
-        const id = spotifyUserProfile.id;
-        const firebase_token = await admin.auth().createCustomToken(id);
-        res.json({ access_token, refresh_token, firebase_token });
+            const { access_token, refresh_token } = data;
+            const spotifyResponse = await fetch('https://api.spotify.com/v1/me', {
+                headers: {
+                Authorization: `Bearer ${access_token}`
+                }
+            });
+            const spotifyUserProfile = await spotifyResponse.json();
+            const id = spotifyUserProfile.id;
+            const firebase_token = await admin.auth().createCustomToken(id);
+            res.json({ access_token, refresh_token, firebase_token });
 
-        } catch (error) {
-        console.error('Error:', error);
-        res.status(500).send('Internal Server Error');
-        }
+            } catch (error) {
+            console.error('Error:', error);
+            res.status(500).send('Internal Server Error');
+            }
     });
-  });
+});
