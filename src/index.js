@@ -38,7 +38,12 @@ async function onPageLoad() {
                 active_jams.push(jam_id);
                 var jam_container = construct_jam_container(jam_id);
                 document.getElementById("JamsContainer").appendChild(jam_container);
-                document.getElementById(`Jam${jam_id}`).addEventListener("click", function(){join_jam(jam_id)}, false);
+                document.getElementById(`Jam${jam_id}`).addEventListener("click", function(event) {
+                    if (event.target.tagName !== 'IMG') {
+                        // Call join_jam only if the clicked element is not a link
+                        join_jam(jam_id);
+                    }
+                }, false);
             }
             // Updating the jams state
             sessionStorage.setItem(`Jam${jam_id}`, JSON.stringify(data));
