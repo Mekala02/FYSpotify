@@ -3,9 +3,11 @@ import { getDatabase, ref, onValue, set, update, remove, onDisconnect} from "fir
 import { getAuth, signInWithCustomToken } from "firebase/auth";
 import "./main.sass";
 import "./images/default_pp.png";
+import "./images/spotify_logo.svg";
+import "./images/spotify_logo_black.svg";
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const redirect_uri = "https://fyspotify.xyz";
+const redirect_uri = "http://fyspotify.xyz";
 const firebaseConfig = {
     apiKey: "AIzaSyBBuPBTFnu_oeeba5vJ60fmp1hxNuexckY",
     authDomain: "fyspotify-f83f1.firebaseapp.com",
@@ -48,6 +50,7 @@ async function onPageLoad() {
             modify_jam(jam_id, "TrackTitle", data.track_title);
             modify_jam(jam_id, "TrackArtist", data.track_artist);
             modify_jam(jam_id, "AlbumImage", data.album_image);
+            modify_jam(jam_id, "SpotifyLink", data.music_url);
             // Deleting all participants from client side then readding based on database
             const participants_container = document.getElementById(`JamParticipants${jam_id}`);
             while (participants_container.firstChild) {
@@ -60,6 +63,7 @@ async function onPageLoad() {
             if (jam_id == participated_jam){
                 const no_active_device = sessionStorage.getItem("no_active_device");
                 document.getElementById(`Jam${participated_jam}`).style.backgroundColor = '#82aa2f';
+                document.getElementById(`SpotifyLinkImg${participated_jam}`).src = "images/spotify_logo_black.svg"
                 const is_playing = data.is_playing
                 const music_url = data.music_url
                 // If someone other then our client changed the playback state 
@@ -176,6 +180,24 @@ function construct_jam_container(id){
     album_image.setAttribute("id", `AlbumImage${id}`);
     jam_middle.appendChild(album_image);
 
+    var jam_middle_right = document.createElement("div");
+    jam_middle_right.setAttribute("class", "JamMiddleRightContainer");
+
+    var spotify_link = document.createElement("div");
+    spotify_link.setAttribute("class", "SpotifyLinkContainer");
+
+    var a_link = document.createElement("a");
+    a_link.setAttribute("target", "_blank");
+    a_link.setAttribute("id", `SpotifyLinkA${id}`);
+
+    var spotify_logo = document.createElement("img");
+    spotify_logo.setAttribute("class", "SpotifyLink");
+    spotify_logo.setAttribute("id", `SpotifyLinkImg${id}`);
+    spotify_logo.setAttribute("src", "images/spotify_logo.svg");
+
+    a_link.appendChild(spotify_logo);
+    spotify_link.appendChild(a_link);
+
     var title_artist = document.createElement("div");
     title_artist.setAttribute("class", "TitleArtist");
     title_artist.setAttribute("id", `TitleArtist${id}`);
@@ -190,7 +212,9 @@ function construct_jam_container(id){
     track_artist.setAttribute("id", `TrackArtist${id}`);
     title_artist.appendChild(track_artist);
 
-    jam_middle.appendChild(title_artist);
+    jam_middle_right.appendChild(title_artist);
+    jam_middle_right.appendChild(spotify_link);
+    jam_middle.appendChild(jam_middle_right);
     jam_container.appendChild(jam_top);
     jam_container.appendChild(jam_middle);
 
@@ -203,6 +227,8 @@ function modify_jam(id, field, value) {
             document.getElementById(`${field}${id}`).textContent = value;
         else if (field == "AlbumImage")
             document.getElementById(`AlbumImage${id}`).src = value;
+        else if (field == "SpotifyLink")
+            document.getElementById(`SpotifyLinkA${id}`).href = value;
     }catch(error){
         console.log(error)
     }
