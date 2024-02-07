@@ -95,6 +95,7 @@ async function onPageLoad() {
         try {
             const response = await fetch('https://us-central1-fyspotify-f83f1.cloudfunctions.net/getToken?code=' + code);
             const data = await response.json();
+            await firebase_log_in(data.firebase_token)
             localStorage.setItem('access_token', data.access_token);
             localStorage.setItem('refresh_token', data.refresh_token);
             localStorage.setItem('firebase_token', data.firebase_token);
@@ -110,15 +111,7 @@ async function onPageLoad() {
     // If we refresh the page when we logged in
     else {
         if (localStorage.getItem("access_token")) {
-            const auth = getAuth();
-            await signInWithCustomToken(auth, localStorage.getItem('firebase_token'))
-                .then((userCredential) => {
-                // console.log(userCredential.user)
-                })
-                .catch((error) => {
-                    console.log(error);
-                    logout();
-                });
+            await firebase_log_in(localStorage.getItem('firebase_token'))
             document.getElementById("Login_Button").style.display = 'none';
             document.getElementById("Profile_Photo").style.display = 'block';
             document.getElementById("Profile_Photo").src = localStorage.getItem("profile_picture");
@@ -331,16 +324,6 @@ async function change_music(music_url){
 }
 
 async function handle_log_in() {
-    // Sign in to firebase
-    const auth = getAuth();
-    await signInWithCustomToken(auth, localStorage.getItem('firebase_token'))
-        .then((userCredential) => {
-        // console.log(userCredential.user)
-        })
-        .catch((error) => {
-            console.log(error);
-            logout();
-        });
     document.getElementById("Login_Button").style.display = 'none';
     document.getElementById("Profile_Photo").style.display = 'block';
 
@@ -356,6 +339,18 @@ async function handle_log_in() {
         localStorage.setItem("profile_picture", "images/default_pp.png");
     document.getElementById("Profile_Photo").src = localStorage.getItem("profile_picture");
     setInterval(GetSpotify, 250);
+}
+
+async function firebase_log_in(firebase_token){
+    const auth = getAuth();
+    await signInWithCustomToken(auth, firebase_token)
+        .then((userCredential) => {
+        // console.log(userCredential.user)
+        })
+        .catch((error) => {
+            console.log(error);
+            logout();
+        });
 }
 
 async function GetSpotify() {
