@@ -113,8 +113,12 @@ async function onPageLoad() {
             const auth = getAuth();
             await signInWithCustomToken(auth, localStorage.getItem('firebase_token'))
                 .then((userCredential) => {
-                console.log(userCredential.user)
+                // console.log(userCredential.user)
                 })
+                .catch((error) => {
+                    console.log(error);
+                    logout();
+                });
             document.getElementById("Login_Button").style.display = 'none';
             document.getElementById("Profile_Photo").style.display = 'block';
             document.getElementById("Profile_Photo").src = localStorage.getItem("profile_picture");
@@ -325,8 +329,12 @@ async function handle_log_in() {
     const auth = getAuth();
     await signInWithCustomToken(auth, localStorage.getItem('firebase_token'))
         .then((userCredential) => {
-        console.log(userCredential.user)
+        // console.log(userCredential.user)
         })
+        .catch((error) => {
+            console.log(error);
+            logout();
+        });
     document.getElementById("Login_Button").style.display = 'none';
     document.getElementById("Profile_Photo").style.display = 'block';
 
