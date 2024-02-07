@@ -20,20 +20,20 @@ const firebaseConfig = {
 };
 initializeApp(firebaseConfig);
 const db = getDatabase();
-// List of the active jams
+// List of active jams
 var active_jams = new Array();
 const spotify_client_id = "0806329d039f45cdb2535f4767d7aa4a"
 
 async function onPageLoad() {
     window.sessionStorage.clear();
-    // Trigers when change happens in database
+    // Triggers when there is a change in the database
     onValue(ref(db, "jams/"), (snapshot) => {
         const participated_jam = sessionStorage.getItem("participated_jam");
-        // Looping over all the jams
+        // Loop through all the jams
         snapshot.forEach((childSnapshot) => {
             const jam_id = childSnapshot.key;
             const data = childSnapshot.val();
-            // If client doesnt have that jam we constructing it
+            // If the jam is not in the active jams list, construct it
             if (!active_jams.includes(jam_id)){
                 active_jams.push(jam_id);
                 var jam_container = construct_jam_container(jam_id);
@@ -45,10 +45,10 @@ async function onPageLoad() {
                     }
                 }, false);
             }
-            // Updating the jams state
+            // Update jam state
             sessionStorage.setItem(`Jam${jam_id}`, JSON.stringify(data));
             modify_jam(jam_id, "JamName", data.jam_name);
-            // Make jame name editable by users
+            // Make jam name editable by users
             document.getElementById(`JamName${jam_id}`).ondblclick = function() {
                 makeEditable(jam_id);
             };
@@ -56,7 +56,7 @@ async function onPageLoad() {
             modify_jam(jam_id, "TrackArtist", data.track_artist);
             modify_jam(jam_id, "AlbumImage", data.album_image);
             modify_jam(jam_id, "SpotifyLink", data.music_url);
-            // Deleting all participants from client side then readding based on database
+            // Remove all participants from the client side and re-add based on the database
             const participants_container = document.getElementById(`JamParticipants${jam_id}`);
             while (participants_container.firstChild) {
                 participants_container.removeChild(participants_container.lastChild);
@@ -64,27 +64,28 @@ async function onPageLoad() {
             for (const key in data.participants){
                 add_participant_to_jam(jam_id, key, data.participants[key].picture_url)
             }
-            // If we inside this jam we updating the jam
+            // If the user is inside this jam, update the jam
             if (jam_id == participated_jam){
                 const no_active_device = sessionStorage.getItem("no_active_device");
+                // Highlight the jam
                 document.getElementById(`Jam${participated_jam}`).style.backgroundColor = '#82aa2f';
                 document.getElementById(`SpotifyLinkImg${participated_jam}`).src = "images/spotify_logo_black.svg"
                 const is_playing = data.is_playing
                 const music_url = data.music_url
-                // If someone other then our client changed the playback state 
+                 // Update playback state if someone other than the client changed it 
                 if ((no_active_device == "false") && (sessionStorage.getItem("is_playing") != String(is_playing))){
                     change_playback_state(is_playing);
                 }
-                // If someone other then our client changed the music
+                // Update music if someone other than the client changed it
                 if ((no_active_device == "false") && (sessionStorage.getItem("music_url") != String(music_url))){
                     change_music(music_url);
                 }
-                // If client disconnects deleting it from the jam
+                // Remove client from the jam if disconnected
                 const onDisconnectRef = ref(db, `jams/${participated_jam}/participants/${localStorage.getItem("usr_id")}`);
                 onDisconnect(onDisconnectRef).set(null);
             }
         });
-        // Remoce deleted jam from html (server side deletes unused jams)
+        // Remove deleted jam from HTML (server-side deletes unused jams)
         for (const jam_id of active_jams){
             if (snapshot.val() && !(jam_id in snapshot.val())){
                 document.getElementById(`Jam${jam_id}`).remove();
@@ -93,7 +94,7 @@ async function onPageLoad() {
         }
     });
     const queryString = window.location.search;
-    // If we logged in
+    // If logged in
     if (queryString.length > 0) {
         const urlParams = new URLSearchParams(queryString);
         const code = urlParams.get('code');
@@ -232,7 +233,7 @@ function modify_jam(id, field, value) {
         else if (field == "SpotifyLink")
             document.getElementById(`SpotifyLinkA${id}`).href = value;
     }catch(error){
-        console.log(error)
+        console.error(error)
     }
 }
 
@@ -252,9 +253,7 @@ function makeEditable(id) {
     inputElement.style.outline = 'none';
     inputElement.style.fontSize = computedStyle.fontSize;
     inputElement.style.color = computedStyle.color;
-
     element.appendChild(inputElement);
-
     // Focus on the input element
     inputElement.focus();
     // Select the text in the input element
@@ -281,7 +280,7 @@ async function join_jam(Id){
         })
     }
     else{
-        console.log("You Need To Login First")
+        console.error("You Need To Login First")
     }
 }
 
@@ -334,7 +333,7 @@ async function handle_log_in() {
 
     const profile_info = await fetchWebApi('v1/me', 'GET');
     const profile_picture = profile_info.images[0]
-    console.log(profile_info);
+    // console.log(profile_info);
     localStorage.setItem("usr_id", profile_info.id);
     localStorage.setItem("usr_name", profile_info.display_name);
     if (profile_picture)
@@ -353,7 +352,7 @@ async function firebase_log_in(firebase_token){
         // console.log(userCredential.user)
         })
         .catch((error) => {
-            console.log(error);
+            console.error(error);
             logout();
         });
 }
@@ -400,7 +399,7 @@ async function GetSpotify() {
         }
         else{
             sessionStorage.setItem("no_active_device", true);
-            console.log("Pleas Select Device")
+            console.error("Pleas Select Device")
         }
     } catch (error) {
         if (error.message === "Fetch error: 401 - Unauthorized") {
@@ -469,7 +468,7 @@ function create_jam(){
         })
     }
     else{
-        console.log("You Need To Login First")
+        console.error("You Need To Login First")
     }
 }
 
