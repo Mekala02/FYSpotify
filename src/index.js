@@ -290,6 +290,7 @@ async function join_jam(Id){
 function exit_jam(){
     const participated_jam = sessionStorage.getItem("participated_jam");
     if(participated_jam){
+        document.getElementById(`SpotifyLinkImg${participated_jam}`).src = "images/spotify_logo.svg"
         const usr_id  = localStorage.getItem("usr_id")
         sessionStorage.setItem("participated_jam", null);
         document.getElementById(`Jam${participated_jam}`).style.backgroundColor = '';
