@@ -273,13 +273,18 @@ function makeEditable(id) {
   }
 
 async function join_jam(Id){
-    exit_jam()
-    sessionStorage.setItem("participated_jam", Id);
-    document.getElementById(`Jam${Id}`).style.backgroundColor = '#82aa2f';
-    const reference = ref(db, `jams/${Id}/participants/${localStorage.getItem("usr_id")}`)
-    set(reference, {
-        picture_url: localStorage.getItem("profile_picture"),
-    })
+    if (localStorage.getItem("access_token")){
+        exit_jam()
+        sessionStorage.setItem("participated_jam", Id);
+        document.getElementById(`Jam${Id}`).style.backgroundColor = '#82aa2f';
+        const reference = ref(db, `jams/${Id}/participants/${localStorage.getItem("usr_id")}`)
+        set(reference, {
+            picture_url: localStorage.getItem("profile_picture"),
+        })
+    }
+    else{
+        console.log("You Need To Login First")
+    }
 }
 
 function exit_jam(){
@@ -443,23 +448,28 @@ function logout() {
 }
 
 function create_jam(){
-    exit_jam()
-    const participated_jam = findMinMissingNumber(active_jams)
-    sessionStorage.setItem("participated_jam", participated_jam);
-
-    const reference = ref(db, 'jams/' + participated_jam)
-    var obj = {};
-    obj[localStorage.getItem("usr_id")] = {picture_url: localStorage.getItem("profile_picture")};
-    set(reference, {
-        jam_name: `${localStorage.getItem("usr_name")}'s Room`,
-        music_url: sessionStorage.getItem("music_url"),
-        is_playing: sessionStorage.getItem("is_playing"),        
-        track_title: sessionStorage.getItem("track_title"),
-        track_artist: sessionStorage.getItem("track_artist"),
-        album_image: sessionStorage.getItem("album_image"),
-        participants: obj
-        // progress_ms: sessionStorage.getItem("progress_ms")
-    })
+    if (localStorage.getItem("access_token")){
+        exit_jam()
+        const participated_jam = findMinMissingNumber(active_jams)
+        sessionStorage.setItem("participated_jam", participated_jam);
+    
+        const reference = ref(db, 'jams/' + participated_jam)
+        var obj = {};
+        obj[localStorage.getItem("usr_id")] = {picture_url: localStorage.getItem("profile_picture")};
+        set(reference, {
+            jam_name: `${localStorage.getItem("usr_name")}'s Room`,
+            music_url: sessionStorage.getItem("music_url"),
+            is_playing: sessionStorage.getItem("is_playing"),        
+            track_title: sessionStorage.getItem("track_title"),
+            track_artist: sessionStorage.getItem("track_artist"),
+            album_image: sessionStorage.getItem("album_image"),
+            participants: obj
+            // progress_ms: sessionStorage.getItem("progress_ms")
+        })
+    }
+    else{
+        console.log("You Need To Login First")
+    }
 }
 
 function findMinMissingNumber(arr) {
