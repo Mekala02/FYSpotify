@@ -434,7 +434,7 @@ function request_authorization() {
     url.searchParams.append('response_type', 'code');
     url.searchParams.append('redirect_uri', redirect_uri);
     url.searchParams.append('show_dialog', 'true');
-    url.searchParams.append('scope', 'user-read-private user-read-email user-modify-playback-state user-read-playback-position user-library-read streaming user-read-playback-state user-read-recently-played playlist-read-private user-top-read user-follow-read');
+    url.searchParams.append('scope', 'user-read-playback-state user-modify-playback-state');
     window.location.href = url.toString();
 }
 

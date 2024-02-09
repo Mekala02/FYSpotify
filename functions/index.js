@@ -119,7 +119,6 @@ async function handle_new_spotify_token(access_token, refresh_token){
     
     const reference = admin.database().ref('users/' + id)
     reference.set({
-        email: profile_info.email,
         username: profile_info.display_name,
         profile_picture: profile_picture,
         access_token: access_token,
