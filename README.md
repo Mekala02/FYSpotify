@@ -1,6 +1,6 @@
 # FYSpotify
  <h1> !!! This app is currently in <a href="https://developer.spotify.com/documentation/web-api/concepts/quota-modes">Development Mode</a></h1>
- <h2><a href="fyspotify.xyz">fyspotify.xyz</a> </br> </h2>
+ <h2><a href="https://fyspotify.xyz">fyspotify.xyz</a> </br> </h2>
  
  <h3> The app operates similarly to a Spotify jam session, enabling users to join "jam sessions" without requiring an invitation link. You can just join an existing jam by clicking on it on the webpage. It does not broadcast music; instead, it solely utilizes Spotify's platform for music playback while synchronizing the played tracks among participants.</br></h3>
  
