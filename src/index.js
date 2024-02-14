@@ -7,7 +7,7 @@ import "./images/spotify_logo.svg";
 import "./images/spotify_logo_black.svg";
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const redirect_uri = "https://fyspotify.xyz";
+const redirect_uri = "http://127.0.0.1:5500";
 const firebaseConfig = {
     apiKey: "AIzaSyBBuPBTFnu_oeeba5vJ60fmp1hxNuexckY",
     authDomain: "fyspotify-f83f1.firebaseapp.com",
@@ -270,7 +270,7 @@ function makeEditable(id) {
   }
 
 async function join_jam(Id){
-    if (localStorage.getItem("access_token")){
+    if (can_participate()){
         exit_jam()
         sessionStorage.setItem("participated_jam", Id);
         document.getElementById(`Jam${Id}`).style.backgroundColor = '#82aa2f';
@@ -281,9 +281,18 @@ async function join_jam(Id){
             picture_url: localStorage.getItem("profile_picture")
         })
     }
-    else{
+}
+
+function can_participate(){
+    if (!localStorage.getItem("access_token")){
         console.error("You Need To Login First")
+        return 0
     }
+    else if (sessionStorage.getItem("no_active_device") == "true"){
+        console.error("First you need to select device")
+        return 0
+    }
+    return 1
 }
 
 function exit_jam(){
@@ -456,7 +465,7 @@ function logout() {
 }
 
 function create_jam(){
-    if (localStorage.getItem("access_token")){
+    if (can_participate()){
         const participated_jam = findMinMissingNumber(active_jams)
         const reference = ref(db, 'jams/' + participated_jam)
         set(reference, {
@@ -469,9 +478,6 @@ function create_jam(){
             // progress_ms: sessionStorage.getItem("progress_ms")
         })
         join_jam(participated_jam)
-    }
-    else{
-        console.error("You Need To Login First")
     }
 }
 
