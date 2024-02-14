@@ -62,7 +62,7 @@ async function onPageLoad() {
                 participants_container.removeChild(participants_container.lastChild);
             }
             for (const key in data.participants){
-                add_participant_to_jam(jam_id, key, data.participants[key].picture_url)
+                add_participant_to_jam(jam_id, key, data.participants[key].profile_url, data.participants[key].usr_name, data.participants[key].picture_url)
             }
             // If the user is inside this jam, update the jam
             if (jam_id == participated_jam){
@@ -276,7 +276,9 @@ async function join_jam(Id){
         document.getElementById(`Jam${Id}`).style.backgroundColor = '#82aa2f';
         const reference = ref(db, `jams/${Id}/participants/${localStorage.getItem("usr_id")}`)
         set(reference, {
-            picture_url: localStorage.getItem("profile_picture"),
+            profile_url: localStorage.getItem("profile_url"),
+            usr_name: localStorage.getItem("usr_name"),
+            picture_url: localStorage.getItem("profile_picture")
         })
     }
     else{
@@ -296,13 +298,18 @@ function exit_jam(){
     }
 }
 
-function add_participant_to_jam(jam_id, usr_id, picture_url) {
+function add_participant_to_jam(jam_id, usr_id, profile_url, usr_name, picture_url) {
     if(!document.getElementById(`ParticipantPhoto${usr_id}`)){
         var participant_photo = document.createElement("img");
         participant_photo.setAttribute("class", "ParticipantPhoto");
         participant_photo.setAttribute("id", `ParticipantPhoto${usr_id}`);
+        participant_photo.title = usr_name;
         participant_photo.src = picture_url;
-        document.getElementById(`JamParticipants${jam_id}`).appendChild(participant_photo);
+        var anchor = document.createElement("a");
+        anchor.target = "_blank";
+        anchor.href = profile_url;
+        anchor.appendChild(participant_photo);
+        document.getElementById(`JamParticipants${jam_id}`).appendChild(anchor);
     }
 }
 
@@ -336,6 +343,7 @@ async function handle_log_in() {
     // console.log(profile_info);
     localStorage.setItem("usr_id", profile_info.id);
     localStorage.setItem("usr_name", profile_info.display_name);
+    localStorage.setItem("profile_url", profile_info.external_urls.spotify);
     if (profile_picture)
         localStorage.setItem("profile_picture", profile_picture.url);
     // If user dont have profile picture seting it to default one
@@ -455,7 +463,7 @@ function create_jam(){
     
         const reference = ref(db, 'jams/' + participated_jam)
         var obj = {};
-        obj[localStorage.getItem("usr_id")] = {picture_url: localStorage.getItem("profile_picture")};
+        obj[localStorage.getItem("usr_id")] = {profile_url: localStorage.getItem("profile_url"), usr_name: localStorage.getItem("usr_name"), picture_url: localStorage.getItem("profile_picture")};
         set(reference, {
             jam_name: `${localStorage.getItem("usr_name")}'s Room`,
             music_url: sessionStorage.getItem("music_url"),
