@@ -14,3 +14,14 @@
 <img src="https://github.com/Mekala02/FYSpotify/blob/main/docs/2.PNG" title="" alt=""/>&nbsp;
 
 <img src="https://github.com/Mekala02/FYSpotify/blob/main/docs/3.PNG" title="" alt=""/>&nbsp;
+
+
+```
+npm run dev
+```
+
+```
+npm build
+firebase deploy --only functions
+firebase deploy --only hosting
+```
